@@ -1,13 +1,30 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
+    <div>
+      <button v-show="!isAuthenticated()" @click="handleLogin()">Authenticate with Strava</button>
+      <button v-show="isAuthenticated()" @click="handleLogout()">Log out</button>
+    </div>
     <router-view/>
   </div>
 </template>
 
 <script>
+import auth from './auth'
+
 export default {
-  name: 'App'
+  name: 'App',
+
+  methods: {
+    isAuthenticated () {
+      return auth.isAuthenticated()
+    },
+    handleLogin () {
+      auth.stravaRequestAccess()
+    },
+    handleLogout () {
+      auth.deauthenticate(this)
+    }
+  }
 }
 </script>
 
