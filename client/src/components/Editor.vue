@@ -18,7 +18,7 @@
         <td>{{ activity.Name }}</td>
         <td>{{ formatDistance(activity.Distance) }}</td>
         <td>{{ formatBool(activity.Commute) }}</td>
-        <td>
+        <td :class="diffPrivate.includes(activity.Id) ? 'private' : ''">
           <input type="checkbox" v-model="selectedPrivate" :value="activity.Id" number>
         </td>
       </tr>
@@ -52,11 +52,21 @@ function dateToEpochTimestamp (d) {
   return (d.getTime() / 1000).toFixed(0)
 }
 
+function arrayDiff (arr1, arr2) {
+  var diff = arr1
+    .filter(x => !arr2.includes(x))
+    .concat(arr2.filter(x => !arr1.includes(x)))
+
+  return diff
+}
+
 export default {
   data: function () {
     return {
       activities: [],
       selectedPrivate: [],
+      originalPrivate: [],
+      diffPrivate: [],
       startDate: dateWeekAgo(),
       endDate: dateNow()
     }
@@ -68,7 +78,8 @@ export default {
 
   watch: {
     selectedPrivate: function (val) {
-      console.log(this.selectedPrivate) // TODO: remove
+      this.diffPrivate = arrayDiff(this.selectedPrivate, this.originalPrivate)
+      console.log('diff:' + this.diffPrivate) // TODO: remove
     },
     startDate: function (val) {
       this.fetchActivities()
@@ -100,6 +111,8 @@ export default {
             that.selectedPrivate.push(activity.Id)
           }
         })
+
+        this.originalPrivate = this.selectedPrivate
       }, response => {
         this.error = response.statusText
       })
@@ -141,3 +154,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+td.private {
+  background-color: #369;
+}
+</style>
