@@ -2,24 +2,25 @@
   <div>
     <datepicker v-model="startDate"></datepicker>
     <datepicker v-model="endDate"></datepicker>
-    <table>
+    <table border="1">
       <tr>
-        <th><input type="checkbox" v-model="selectAll"></th>
         <th>Date</th>
         <th>Name</th>
         <th>Distance</th>
         <th>Commute</th>
-        <th>Private</th>
+        <th>
+          <input type="checkbox" v-model="selectAllPrivate">
+          Private
+        </th>
       </tr>
       <tr v-for="activity in activities" :key="activity.Id">
-        <td>
-          <input type="checkbox" v-model="selected" :value="activity.Id" number>
-        </td>
         <td>{{ formatDate(activity.Start_date_local) }}</td>
         <td>{{ activity.Name }}</td>
         <td>{{ formatDistance(activity.Distance) }}</td>
         <td>{{ formatBool(activity.Commute) }}</td>
-        <td>{{ formatBool(activity.Private) }}</td>
+        <td>
+          <input type="checkbox" v-model="selectedPrivate" :value="activity.Id" number>
+        </td>
       </tr>
     </table>
     <div v-if="activities.length == 0">No activities for selected dates.</div>
@@ -55,7 +56,7 @@ export default {
   data: function () {
     return {
       activities: [],
-      selected: [],
+      selectedPrivate: [],
       startDate: dateWeekAgo(),
       endDate: dateNow()
     }
@@ -66,6 +67,9 @@ export default {
   },
 
   watch: {
+    selectedPrivate: function (val) {
+      console.log(this.selectedPrivate) // TODO: remove
+    },
     startDate: function (val) {
       this.fetchActivities()
     },
@@ -88,6 +92,14 @@ export default {
 
       this.$http.get('/api/activities', { headers: headers, params: params }).then(response => {
         this.activities = response.body
+
+        this.selectedPrivate = []
+        var that = this
+        this.activities.forEach(function (activity) {
+          if (activity.Private) {
+            that.selectedPrivate.push(activity.Id)
+          }
+        })
       }, response => {
         this.error = response.statusText
       })
@@ -112,20 +124,18 @@ export default {
   },
 
   computed: {
-    selectAll: {
+    selectAllPrivate: {
       get: function () {
-        return this.activities ? this.selected.length === this.activities.length : false
+        return this.activities ? this.selectedPrivate.length === this.activities.length : false
       },
       set: function (value) {
-        var selected = []
-
+        this.selectedPrivate = []
+        var that = this
         if (value) {
           this.activities.forEach(function (activity) {
-            selected.push(activity.Id)
+            that.selectedPrivate.push(activity.Id)
           })
         }
-
-        this.selected = selected
       }
     }
   }
