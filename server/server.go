@@ -39,6 +39,7 @@ type StravaActivityModel struct {
 	Start_latlng     [2]float64
 	End_latlng       [2]float64
 	Commute          bool
+	Private          bool
 }
 
 type AuthResponse struct {

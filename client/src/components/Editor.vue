@@ -9,6 +9,7 @@
         <th>Name</th>
         <th>Distance</th>
         <th>Commute</th>
+        <th>Private</th>
       </tr>
       <tr v-for="activity in activities" :key="activity.Id">
         <td>
@@ -17,7 +18,8 @@
         <td>{{ formatDate(activity.Start_date_local) }}</td>
         <td>{{ activity.Name }}</td>
         <td>{{ formatDistance(activity.Distance) }}</td>
-        <td>{{ formatCommute(activity.Commute) }}</td>
+        <td>{{ formatBool(activity.Commute) }}</td>
+        <td>{{ formatBool(activity.Private) }}</td>
       </tr>
     </table>
     <div v-if="activities.length == 0">No activities for selected dates.</div>
@@ -100,7 +102,7 @@ export default {
       return (m / 1000).toFixed(1)
     },
 
-    formatCommute: function (c) {
+    formatBool: function (c) {
       if (c) {
         return 'yes'
       } else {
