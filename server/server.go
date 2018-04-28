@@ -75,9 +75,8 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // TODO: use pagination and fetch till empty list is returned
-// TODO: user should specify a date range
-func fetchActivities(accessToken string) ([]StravaActivityModel, error) {
-	fetchUrl := fmt.Sprintf("%s/athlete/activities?before=%d&after=%d", BaseUrl, 1513555199, 1512345600)
+func fetchActivities(accessToken string, afterEpoch, beforeEpoch string) ([]StravaActivityModel, error) {
+	fetchUrl := fmt.Sprintf("%s/athlete/activities?before=%s&after=%s", BaseUrl, beforeEpoch, afterEpoch)
 
 	client := &http.Client{}
 
@@ -107,7 +106,10 @@ func fetchActivities(accessToken string) ([]StravaActivityModel, error) {
 func GetActivitiesHandler(w http.ResponseWriter, r *http.Request) {
 	accessToken := r.Header.Get("Authorization")
 
-	activities, err := fetchActivities(accessToken)
+	afterEpoch := r.URL.Query().Get("after")
+	beforeEpoch := r.URL.Query().Get("before")
+
+	activities, err := fetchActivities(accessToken, afterEpoch, beforeEpoch)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
