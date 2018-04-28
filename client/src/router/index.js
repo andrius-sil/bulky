@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Editor from '@/components/Editor'
 import Home from '@/components/Home'
+import NotFound from '@/components/NotFound'
 
 import auth from '../auth'
 
@@ -36,6 +37,10 @@ export default new Router({
       path: '/editor',
       component: Editor,
       beforeEnter: requireAuth
+    },
+    {
+      path: '*',
+      component: NotFound
     }
   ]
 })
