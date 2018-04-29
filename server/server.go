@@ -41,6 +41,7 @@ type StravaActivityModel struct {
 	End_latlng       [2]float64
 	Commute          bool
 	Private          bool
+	Url              string
 }
 
 type StravaUpdatableActivityModel struct {
@@ -123,6 +124,10 @@ func GetActivitiesHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	for i, activity := range activities {
+		activities[i].Url = fmt.Sprintf("https://www.strava.com/activities/%d", activity.Id)
 	}
 
 	json.NewEncoder(w).Encode(activities)
