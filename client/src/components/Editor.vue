@@ -6,7 +6,7 @@
       <tr>
         <th>Date</th>
         <th>Name</th>
-        <th>Distance</th>
+        <th>Distance (km)</th>
         <th>Commute</th>
         <th>
           <input type="checkbox" v-model="selectAllPrivate">
