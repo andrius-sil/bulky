@@ -18,12 +18,13 @@
         <td>{{ activity.Name }}</td>
         <td>{{ formatDistance(activity.Distance) }}</td>
         <td>{{ formatBool(activity.Commute) }}</td>
-        <td :class="diffPrivate.includes(activity.Id) ? 'private' : ''">
+        <td :class="modifiedPrivate.includes(activity.Id) ? 'private' : ''">
           <input type="checkbox" v-model="selectedPrivate" :value="activity.Id" number>
         </td>
       </tr>
     </table>
-    <div v-if="activities.length == 0">No activities for selected dates.</div>
+    <div v-if="activities.length === 0">No activities for selected dates.</div>
+    <button :disabled="modifiedPrivate.length === 0" @click="updateActivities()">Update Activities</button>
   </div>
 </template>
 
@@ -64,9 +65,11 @@ export default {
   data: function () {
     return {
       activities: [],
+
       selectedPrivate: [],
-      originalPrivate: [],
-      diffPrivate: [],
+      fetchedPrivate: [],
+      modifiedPrivate: [],
+
       startDate: dateWeekAgo(),
       endDate: dateNow()
     }
@@ -78,8 +81,7 @@ export default {
 
   watch: {
     selectedPrivate: function (val) {
-      this.diffPrivate = arrayDiff(this.selectedPrivate, this.originalPrivate)
-      console.log('diff:' + this.diffPrivate) // TODO: remove
+      this.modifiedPrivate = arrayDiff(this.selectedPrivate, this.fetchedPrivate)
     },
     startDate: function (val) {
       this.fetchActivities()
@@ -104,6 +106,7 @@ export default {
       this.$http.get('/api/activities', { headers: headers, params: params }).then(response => {
         this.activities = response.body
 
+        // Preselect all private activities.
         this.selectedPrivate = []
         var that = this
         this.activities.forEach(function (activity) {
@@ -112,7 +115,32 @@ export default {
           }
         })
 
-        this.originalPrivate = this.selectedPrivate
+        // Remember the original selection.
+        this.fetchedPrivate = this.selectedPrivate
+      }, response => {
+        this.error = response.statusText
+      })
+    },
+
+    updateActivities: function () {
+      if (this.modifiedPrivate.length === 0) {
+        return
+      }
+
+      // List of activities with their new 'Private' flags.
+      var updatePrivate = {}
+      for (var i = 0; i < this.modifiedPrivate.length; i++) {
+        var activityId = this.modifiedPrivate[i]
+        updatePrivate[activityId] = this.selectedPrivate.includes(activityId)
+      }
+
+      // This is to disable button while request is being processed.
+      this.modifiedPrivate = []
+
+      var headers = auth.getAuthHeaders()
+      var payload = { private: updatePrivate }
+      this.$http.put('/api/activities_update', JSON.stringify(payload), { headers: headers }).then(response => {
+        this.fetchActivities()
       }, response => {
         this.error = response.statusText
       })

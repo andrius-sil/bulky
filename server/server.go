@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -40,6 +41,14 @@ type StravaActivityModel struct {
 	End_latlng       [2]float64
 	Commute          bool
 	Private          bool
+}
+
+type StravaUpdatableActivityModel struct {
+	Private bool `json:"private"`
+}
+
+type ActivitiesUpdateModel struct {
+	Private map[int]bool
 }
 
 type AuthResponse struct {
@@ -119,6 +128,52 @@ func GetActivitiesHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(activities)
 }
 
+func ActivitiesUpdateHandler(w http.ResponseWriter, r *http.Request) {
+	accessToken := r.Header.Get("Authorization")
+
+	var data ActivitiesUpdateModel
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for activityId, privateValue := range data.Private {
+		err := updateActivity(accessToken, activityId, privateValue)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
+func updateActivity(accessToken string, id int, privateValue bool) error {
+	updateUrl := fmt.Sprintf("%s/activities/%d", BaseUrl, id)
+
+	payload := StravaUpdatableActivityModel{privateValue}
+	b, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("PUT", updateUrl, bytes.NewBuffer(b))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Authorization", accessToken)
+	req.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return nil
+}
+
 func run() {
 	if clientSecret == "" {
 		fmt.Println("'STRAVA_CLIENT_SECRET' env variable is empty or unset")
@@ -130,6 +185,7 @@ func run() {
 	api := r.PathPrefix("/api/").Subrouter()
 	api.HandleFunc("/login", loginHandler).Methods("POST")
 	api.HandleFunc("/activities", GetActivitiesHandler).Methods("GET")
+	api.HandleFunc("/activities_update", ActivitiesUpdateHandler).Methods("PUT")
 
 	loggedRouter := handlers.LoggingHandler(os.Stdout, r)
 
