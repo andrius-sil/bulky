@@ -19,7 +19,7 @@
       <div class="container">
         <div class="content has-text-centered">
           <p>
-            Bulk Editor for Strava Activities by <i>Andrius Silinskas</i>.
+            Strava Activities Editor by <i>Andrius Silinskas</i>.
           </p>
         </div>
       </div>
