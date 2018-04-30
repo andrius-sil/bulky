@@ -32,16 +32,16 @@ type StravaTokenModel struct {
 	Athlete      StravaAthleteModel
 }
 
-type StravaActivityModel struct {
-	Id               int
-	Name             string
-	Start_date_local string
-	Distance         float64
-	Start_latlng     [2]float64
-	End_latlng       [2]float64
-	Commute          bool
-	Private          bool
-	Url              string
+type StravaSummaryActivityModel struct {
+	Id           int
+	Name         string
+	Start_date   string
+	Distance     float64
+	Start_latlng [2]float64
+	End_latlng   [2]float64
+	Commute      bool
+	Private      bool
+	Url          string
 }
 
 type StravaUpdatableActivityModel struct {

@@ -14,7 +14,7 @@
         </th>
       </tr>
       <tr v-for="activity in activities" :key="activity.Id">
-        <td>{{ formatDate(activity.Start_date_local) }}</td>
+        <td>{{ formatDate(activity.Start_date) }}</td>
         <td><a :href="activity.Url">{{ activity.Name }}</a></td>
         <td>{{ formatDistance(activity.Distance) }}</td>
         <td>{{ formatBool(activity.Commute) }}</td>
