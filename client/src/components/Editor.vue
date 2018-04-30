@@ -1,30 +1,57 @@
 <template>
   <div>
-    <datepicker v-model="startDate"></datepicker>
-    <datepicker v-model="endDate"></datepicker>
-    <table border="1">
-      <tr>
-        <th>Date</th>
-        <th>Name</th>
-        <th>Distance (km)</th>
-        <th>Commute</th>
-        <th>
-          <input type="checkbox" v-model="selectAllPrivate">
-          Private
-        </th>
-      </tr>
-      <tr v-for="activity in activities" :key="activity.Id">
-        <td>{{ formatDate(activity.Start_date) }}</td>
-        <td><a :href="activity.Url">{{ activity.Name }}</a></td>
-        <td>{{ formatDistance(activity.Distance) }}</td>
-        <td>{{ formatBool(activity.Commute) }}</td>
-        <td :class="modifiedPrivate.includes(activity.Id) ? 'private' : ''">
-          <input type="checkbox" v-model="selectedPrivate" :value="activity.Id" number>
-        </td>
-      </tr>
-    </table>
-    <div v-if="activities.length === 0">No activities for selected dates.</div>
-    <button :disabled="modifiedPrivate.length === 0" @click="updateActivities()">Update Activities</button>
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <p>from</p>
+        </div>
+        <div class="level-item">
+          <datepicker wrapper-class="control" input-class="input" v-model="startDate"></datepicker>
+        </div>
+
+        <div class="level-item"></div>
+
+        <div class="level-item">
+          <p>to</p>
+        </div>
+        <div class="level-item">
+          <datepicker wrapper-class="control" input-class="input" v-model="endDate"></datepicker>
+        </div>
+      </div>
+
+      <div class="level-right">
+        <div class="level-item">
+          <button class="button is-primary" :disabled="modifiedPrivate.length === 0" @click="updateActivities()">Update Activities</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <table class="table is-fullwidth">
+        <tr>
+          <th>Date</th>
+          <th>Name</th>
+          <th>Distance (km)</th>
+          <th>Commute</th>
+          <th>
+            <input type="checkbox" v-model="selectAllPrivate">
+            Private
+          </th>
+        </tr>
+        <tr v-for="activity in activities" :key="activity.Id" :class="modifiedPrivate.includes(activity.Id) ? 'is-selected' : ''">
+          <td>{{ formatDate(activity.Start_date) }}</td>
+          <td><a :href="activity.Url">{{ activity.Name }}</a></td>
+          <td>{{ formatDistance(activity.Distance) }}</td>
+          <td>{{ formatBool(activity.Commute) }}</td>
+          <td>
+            <input type="checkbox" v-model="selectedPrivate" :value="activity.Id" number>
+          </td>
+        </tr>
+      </table>
+
+      <div v-if="activities.length === 0">No activities for selected dates.</div>
+    </div>
+
   </div>
 </template>
 
@@ -182,9 +209,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-td.private {
-  background-color: #369;
-}
-</style>

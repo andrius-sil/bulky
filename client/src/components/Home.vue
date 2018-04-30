@@ -1,7 +1,14 @@
 <template>
-  <div>
-    App needs Strava permissions to see private activities and modify all activities.
-  </div>
+  <section class="hero is-primary is-medium">
+    <div class="hero-body">
+      <div class="container has-text-centered">
+        <h1 class="subtitle">
+          <strong>App needs Strava permissions to see private activities and modify all activities.</strong>
+        </h1>
+        <button class="button is-link" @click="handleLogin()">Authenticate with Strava</button>
+      </div>
+    </div>
+  </section>
 </template>
 
 <script>
@@ -13,6 +20,12 @@ export default {
     var authCode = this.$route.query.code
     if (authCode != null) {
       auth.stravaTokenExchange(this, authCode, '/editor')
+    }
+  },
+
+  methods: {
+    handleLogin () {
+      auth.stravaRequestAccess()
     }
   }
 }
