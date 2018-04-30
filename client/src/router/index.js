@@ -24,7 +24,6 @@ function requireAuth (to, from, next) {
   }
 }
 
-// TODO: error page for non-existing routes
 export default new Router({
   mode: 'history', // TODO: why query params won't work otherwise?
   routes: [
