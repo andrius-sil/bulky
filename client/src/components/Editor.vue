@@ -49,7 +49,11 @@
         </tr>
       </table>
 
-      <div v-if="activities.length === 0">No activities for selected dates.</div>
+      <div class="has-text-centered" v-if="activities.length === 0">
+        <p>
+          <strong>No activities for selected dates.</strong>
+        </p>
+      </div>
     </div>
 
   </div>
