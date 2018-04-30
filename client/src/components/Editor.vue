@@ -161,7 +161,7 @@ export default {
         updatePrivate[activityId] = this.selectedPrivate.includes(activityId)
       }
 
-      // This is to disable button while request is being processed.
+      // Disable button while request is being processed.
       this.modifiedPrivate = []
 
       var headers = auth.getAuthHeaders()
