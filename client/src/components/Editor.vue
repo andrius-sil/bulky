@@ -50,7 +50,7 @@
       </table>
 
       <div class="has-text-centered" v-if="activities.length === 0">
-        <p>
+        <p class="no-activities">
           <strong>No activities for selected dates.</strong>
         </p>
       </div>
