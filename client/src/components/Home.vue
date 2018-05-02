@@ -5,7 +5,7 @@
         <h1 class="subtitle">
           <strong>App needs Strava permissions to see private activities and modify all activities.</strong>
         </h1>
-        <button class="button is-link" @click="handleLogin()">Authenticate with Strava</button>
+        <a @click="handleLogin()"><img src="../assets/btn_strava_connectwith_orange.png"></a>
       </div>
     </div>
   </section>

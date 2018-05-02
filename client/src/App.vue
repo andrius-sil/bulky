@@ -7,7 +7,7 @@
 
       <div class="navbar-menu">
         <div class="navbar-end">
-          <button class="button is-link is-outlined is-small" v-show="!isAuthenticated() && !isHomepage" @click="handleLogin()">Authenticate with Strava</button>
+          <!--<button class="button is-link is-outlined is-small" v-show="!isAuthenticated() && !isHomepage" @click="handleLogin()">Authenticate with Strava</button>-->
           <button class="button is-link is-outlined is-small" v-show="isAuthenticated()" @click="handleLogout()">Revoke Strava Access</button>
         </div>
       </div>
@@ -21,6 +21,7 @@
           <p>
             Strava Activities Editor by <i>Andrius Silinskas</i>.
           </p>
+          <img src="./assets/api_logo_pwrdBy_strava_stack_gray.png">
         </div>
       </div>
     </footer>
