@@ -1,6 +1,6 @@
 # Bulky
 
-Strava Activities Editor.
+Edit Strava activities in bulk.
 
 ![Bulky screenshot](https://github.com/thunderstruck/bulky/blob/master/misc/images/bulky.png)
 
