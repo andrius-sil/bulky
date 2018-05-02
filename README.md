@@ -2,6 +2,8 @@
 
 Strava Activities Editor.
 
+[[https://github.com/thunderstruck/bulky/blob/master/misc/images/bulky.png]]
+
 ## Built With
 
 * [Go](https://golang.org/)
