@@ -2,7 +2,7 @@
 
 Strava Activities Editor.
 
-[[https://github.com/thunderstruck/bulky/blob/master/misc/images/bulky.png]]
+![Bulky screenshot](https://github.com/thunderstruck/bulky/blob/master/misc/images/bulky.png)
 
 ## Built With
 
