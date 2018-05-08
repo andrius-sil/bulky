@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 )
 
@@ -48,6 +49,12 @@ func fetchActivities(accessToken string, afterEpoch, beforeEpoch string) ([]Stra
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := ioutil.ReadAll(resp.Body)
+		bodyString := string(bodyBytes)
+		return nil, fmt.Errorf("Strava API returned %d (%s)\n", resp.StatusCode, bodyString)
+	}
 
 	data := make([]StravaSummaryActivityModel, 0)
 	err = json.NewDecoder(resp.Body).Decode(&data)
