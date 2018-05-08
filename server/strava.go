@@ -31,7 +31,6 @@ func init() {
 	httpClient = &http.Client{}
 }
 
-// TODO: use pagination and fetch till empty list is returned
 func fetchActivities(accessToken string, afterEpoch, beforeEpoch string) ([]StravaSummaryActivityModel, error) {
 	fetchMethod := "GET"
 	fetchUrl := fmt.Sprintf("%s/athlete/activities?before=%s&after=%s", BaseUrl, beforeEpoch, afterEpoch)
@@ -50,8 +49,7 @@ func fetchActivities(accessToken string, afterEpoch, beforeEpoch string) ([]Stra
 	}
 	defer resp.Body.Close()
 
-	// TODO: use per page value
-	data := make([]StravaSummaryActivityModel, 50)
+	data := make([]StravaSummaryActivityModel, 0)
 	err = json.NewDecoder(resp.Body).Decode(&data)
 	if err != nil {
 		return nil, err

@@ -54,6 +54,12 @@
           <strong>No activities for selected dates.</strong>
         </p>
       </div>
+
+      <div class="has-text-centered" v-if="activities.length === 30">
+        <p>
+          <strong>Only first 30 activities are displayed. Try a smaller date range to edit the rest of activities.</strong>
+        </p>
+      </div>
     </div>
 
   </div>
