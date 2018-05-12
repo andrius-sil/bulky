@@ -14,11 +14,15 @@
   },
   "dependencies": {
     "bulma": "^0.7.1",
+    "bulma-slider": "^1.0.4",
     "dateformat": "^3.0.3",
+    "dotenv": "^5.0.1",
     "font-awesome": "^4.7.0",
+    "haversine-distance": "^1.1.4",
     "vue": "^2.5.2",
     "vue-resource": "^1.5.0",
     "vue-router": "^3.0.1",
+    "vue2-google-maps": "^0.9.6",
     "vuejs-datepicker": "^1.0.4"
   },
   "devDependencies": {

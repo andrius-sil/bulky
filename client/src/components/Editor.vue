@@ -21,7 +21,48 @@
 
       <div class="level-right">
         <div class="level-item">
-          <button class="button is-primary" :disabled="modifiedPrivate.length === 0" @click="updateActivities()">Update Activities</button>
+          <button class="button is-primary" :disabled="isUpdateDisabled()" @click="updateActivities()">Update Activities</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <p>start</p>
+        </div>
+        <div class="level-item">
+          <GmapAutocomplete class="input" placeholder="Enter home address" @place_changed="setStartPlace"></GmapAutocomplete>
+        </div>
+
+        <div class="level-item"></div>
+
+        <div class="level-item">
+          <p>end</p>
+        </div>
+        <div class="level-item">
+          <GmapAutocomplete class="input" placeholder="Enter work address" @place_changed="setEndPlace"></GmapAutocomplete>
+        </div>
+
+        <div class="level-item"></div>
+
+        <div class="level-item">
+          <p>proximity offset</p>
+        </div>
+        <div class="level-item">
+          <input v-model="proximityMeters" class="slider" type="range" step="50" min="0" max="1000">
+        </div>
+        <div class="level-item">
+          <p>{{ proximityMeters }} metres</p>
+        </div>
+
+        <div class="level-item"></div>
+
+        <div class="level-item">
+          <label class="checkbox">
+            <input type="checkbox" v-model="autoSelectCommutes">
+            Auto select commutes
+          </label>
         </div>
       </div>
     </div>
@@ -32,17 +73,22 @@
           <th>Date</th>
           <th>Name</th>
           <th>Distance (km)</th>
-          <th>Commute</th>
+          <th>
+            <input type="checkbox" v-model="selectAllCommutes">
+            Commute
+          </th>
           <th>
             <input type="checkbox" v-model="selectAllPrivate">
             Private
           </th>
         </tr>
-        <tr v-for="activity in activities" :key="activity.Id" :class="modifiedPrivate.includes(activity.Id) ? 'is-selected' : ''">
+        <tr v-for="activity in activities" :key="activity.Id" :class="getClassForActivity(activity.Id)">
           <td>{{ formatDate(activity.Start_date) }}</td>
           <td><a :href="activity.Url">{{ activity.Name }}</a></td>
           <td>{{ formatDistance(activity.Distance) }}</td>
-          <td>{{ formatBool(activity.Commute) }}</td>
+          <td>
+            <input type="checkbox" v-model="selectedCommute" :value="activity.Id" number>
+          </td>
           <td>
             <input type="checkbox" v-model="selectedPrivate" :value="activity.Id" number>
           </td>
@@ -66,8 +112,11 @@
 </template>
 
 <script>
+import haversineDistance from 'haversine-distance'
 import dateFormat from 'dateformat'
 import Datepicker from 'vuejs-datepicker'
+
+import 'bulma-slider/dist/bulma-slider.min.css'
 
 import auth from '../auth'
 
@@ -107,8 +156,17 @@ export default {
       fetchedPrivate: [],
       modifiedPrivate: [],
 
+      selectedCommute: [],
+      fetchedCommute: [],
+      modifiedCommute: [],
+
       startDate: dateWeekAgo(),
-      endDate: dateNow()
+      endDate: dateNow(),
+
+      startPlaceGeometry: null,
+      endPlaceGeometry: null,
+      proximityMeters: 300,
+      autoSelectCommutes: true
     }
   },
 
@@ -120,11 +178,20 @@ export default {
     selectedPrivate: function (val) {
       this.modifiedPrivate = arrayDiff(this.selectedPrivate, this.fetchedPrivate)
     },
+    selectedCommute: function (val) {
+      this.modifiedCommute = arrayDiff(this.selectedCommute, this.fetchedCommute)
+    },
     startDate: function (val) {
       this.fetchActivities()
     },
     endDate: function (val) {
       this.fetchActivities()
+    },
+    proximityMeters: function (val) {
+      this.selectCommutes()
+    },
+    autoSelectCommutes: function (val) {
+      this.selectCommutes()
     }
   },
 
@@ -143,17 +210,24 @@ export default {
       this.$http.get('/api/activities', { headers: headers, params: params }).then(response => {
         this.activities = response.body
 
-        // Preselect all private activities.
+        // Preselect all private/commute activities.
         this.selectedPrivate = []
+        this.selectedCommute = []
         var that = this
         this.activities.forEach(function (activity) {
           if (activity.Private) {
             that.selectedPrivate.push(activity.Id)
           }
+          if (activity.Commute) {
+            that.selectedCommute.push(activity.Id)
+          }
         })
 
-        // Remember the original selection.
-        this.fetchedPrivate = this.selectedPrivate
+        // Remember the original selections.
+        this.fetchedPrivate = this.selectedPrivate.slice()
+        this.fetchedCommute = this.selectedCommute.slice()
+
+        this.selectCommutes()
       }, response => {
         this.error = response.statusText
       })
@@ -183,21 +257,68 @@ export default {
       })
     },
 
+    selectCommutes: function () {
+      if (!this.autoSelectCommutes) {
+        return
+      }
+
+      if (this.startPlaceGeometry == null || this.endPlaceGeometry == null) {
+        return
+      }
+
+      var placeStartCoords = {
+        lat: this.startPlaceGeometry.location.lat(),
+        lng: this.startPlaceGeometry.location.lng()
+      }
+      var placeEndCoords = {
+        lat: this.endPlaceGeometry.location.lat(),
+        lng: this.endPlaceGeometry.location.lng()
+      }
+
+      this.selectedCommute = []
+      var that = this
+      this.activities.forEach(function (activity) {
+        var activityStartCoords = { lat: activity.Start_latlng[0], lng: activity.Start_latlng[1] }
+        var activityEndCoords = { lat: activity.End_latlng[0], lng: activity.End_latlng[1] }
+
+        var startToStart = haversineDistance(activityStartCoords, placeStartCoords)
+        var startToEnd = haversineDistance(activityStartCoords, placeEndCoords)
+        var endToStart = haversineDistance(activityEndCoords, placeStartCoords)
+        var endToEnd = haversineDistance(activityEndCoords, placeEndCoords)
+
+        if ((startToStart < that.proximityMeters && endToEnd < that.proximityMeters) ||
+            (startToEnd < that.proximityMeters && endToStart < that.proximityMeters)) {
+          that.selectedCommute.push(activity.Id)
+        }
+      })
+    },
+
+    setStartPlace: function (place) {
+      this.startPlaceGeometry = place.geometry
+      this.selectCommutes()
+    },
+    setEndPlace: function (place) {
+      this.endPlaceGeometry = place.geometry
+      this.selectCommutes()
+    },
+
+    getClassForActivity: function (id) {
+      if (this.modifiedPrivate.includes(id) || this.modifiedCommute.includes(id)) {
+        return 'is-selected'
+      }
+
+      return ''
+    },
+    isUpdateDisabled: function () {
+      return this.modifiedPrivate.length === 0 && this.modifiedCommute.length === 0
+    },
+
     formatDate: function (d) {
       var startDate = new Date(d)
       return dateFormat(startDate, 'd mmmm yyyy, HH:MM')
     },
-
     formatDistance: function (m) {
       return (m / 1000).toFixed(1)
-    },
-
-    formatBool: function (c) {
-      if (c) {
-        return 'yes'
-      } else {
-        return 'no'
-      }
     }
   },
 
@@ -212,6 +333,20 @@ export default {
         if (value) {
           this.activities.forEach(function (activity) {
             that.selectedPrivate.push(activity.Id)
+          })
+        }
+      }
+    },
+    selectAllCommutes: {
+      get: function () {
+        return this.activities ? this.selectedCommute.length === this.activities.length : false
+      },
+      set: function (value) {
+        this.selectedCommute = []
+        var that = this
+        if (value) {
+          this.activities.forEach(function (activity) {
+            that.selectedCommute.push(activity.Id)
           })
         }
       }

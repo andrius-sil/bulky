@@ -6,7 +6,16 @@ import router from './router'
 import 'bulma/css/bulma.css'
 import 'font-awesome/css/font-awesome.css'
 
+import * as VueGoogleMaps from 'vue2-google-maps'
+
 Vue.use(VueResource)
+
+Vue.use(VueGoogleMaps, {
+  load: {
+    key: process.env.GOOGLE_MAPS_API_KEY,
+    libraries: 'places'
+  }
+})
 
 Vue.config.productionTip = false
 
