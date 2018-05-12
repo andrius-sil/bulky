@@ -147,6 +147,10 @@ function arrayDiff (arr1, arr2) {
   return diff
 }
 
+function arrayJoin (arr1, arr2) {
+  return [...new Set([...arr1, ...arr2])]
+}
+
 export default {
   data: function () {
     return {
@@ -234,22 +238,26 @@ export default {
     },
 
     updateActivities: function () {
-      if (this.modifiedPrivate.length === 0) {
+      if (this.isUpdateDisabled()) {
         return
       }
 
-      // List of activities with their new 'Private' flags.
-      var updatePrivate = {}
-      for (var i = 0; i < this.modifiedPrivate.length; i++) {
-        var activityId = this.modifiedPrivate[i]
-        updatePrivate[activityId] = this.selectedPrivate.includes(activityId)
-      }
+      var updateValues = {}
+      var modified = arrayJoin(this.modifiedPrivate, this.modifiedCommute)
+      var that = this
+      modified.forEach(function (activityId) {
+        updateValues[activityId] = {
+          private: that.selectedPrivate.includes(activityId),
+          commute: that.selectedCommute.includes(activityId)
+        }
+      })
 
-      // Disable button while request is being processed.
+      // Disable update button while request is being processed.
       this.modifiedPrivate = []
+      this.modifiedCommute = []
 
       var headers = auth.getAuthHeaders()
-      var payload = { private: updatePrivate }
+      var payload = { updateValues }
       this.$http.put('/api/activities_update', JSON.stringify(payload), { headers: headers }).then(response => {
         this.fetchActivities()
       }, response => {

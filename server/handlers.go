@@ -8,8 +8,13 @@ import (
 	"net/url"
 )
 
+type ActivitiesUpdateValues struct {
+	Private bool
+	Commute bool
+}
+
 type ActivitiesUpdateModel struct {
-	Private map[int]bool
+	UpdateValues map[int]ActivitiesUpdateValues
 }
 
 type AuthResponse struct {
@@ -75,8 +80,8 @@ func ActivitiesUpdateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for activityId, privateValue := range data.Private {
-		err := updateActivity(accessToken, activityId, privateValue)
+	for activityId, val := range data.UpdateValues {
+		err := updateActivity(accessToken, activityId, val.Private, val.Commute)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

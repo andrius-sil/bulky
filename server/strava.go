@@ -22,6 +22,7 @@ type StravaSummaryActivityModel struct {
 
 type StravaUpdatableActivityModel struct {
 	Private bool `json:"private"`
+	Commute bool `json:"commute"`
 }
 
 var httpClient *http.Client
@@ -65,12 +66,13 @@ func fetchActivities(accessToken string, afterEpoch, beforeEpoch string) ([]Stra
 	return data, nil
 }
 
-func updateActivity(accessToken string, id int, privateValue bool) error {
+// TODO: check status code
+func updateActivity(accessToken string, id int, privateValue, commuteValue bool) error {
 	updateMethod := "PUT"
 	updateUrl := fmt.Sprintf("%s/activities/%d", BaseUrl, id)
 	fmt.Printf("%s sent - %s\n", updateMethod, updateUrl)
 
-	payload := StravaUpdatableActivityModel{privateValue}
+	payload := StravaUpdatableActivityModel{privateValue, commuteValue}
 	b, err := json.Marshal(payload)
 	if err != nil {
 		return err
