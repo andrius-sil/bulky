@@ -1,0 +1,13 @@
+version: '2'
+services:
+  client:
+    image: bulky-client
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+  server:
+    image: bulky-server
+    env_file: secrets
+    ports:
+      - "3000:3000"
