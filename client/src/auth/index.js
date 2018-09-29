@@ -31,11 +31,11 @@ export default {
   deauthenticate (context) {
     var payload = { access_token: localStorage.getItem(ACCESS_TOKEN) }
     context.$http.post('https://www.strava.com/oauth/deauthorize', payload).then(response => {
-      localStorage.removeItem(ACCESS_TOKEN)
       context.$router.replace('/')
     }, response => {
       context.error = response.statusText
     })
+    localStorage.removeItem(ACCESS_TOKEN)
   },
 
   getAuthHeaders () {
