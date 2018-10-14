@@ -1,13 +1,17 @@
 version: '2'
 services:
   client:
-    image: bulky-client
+    build:
+      dockerfile: Dockerfile
+      context: ./client
     ports:
       - "8080:80"
     depends_on:
       - server
   server:
-    image: bulky-server
+    build:
+      dockerfile: Dockerfile
+      context: ./server
     env_file: secrets
     ports:
       - "3000:3000"
