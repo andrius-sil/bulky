@@ -1,6 +1,6 @@
 
 const CLIENT_ID = '24292'
-const REDIRECT_URL = 'http://localhost:8080/' // TODO: use config values
+const REDIRECT_URL = `http://${process.env.HOST}:${process.env.PORT}/`
 
 const ACCESS_TOKEN = 'access_token'
 
